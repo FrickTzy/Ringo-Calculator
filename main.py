@@ -27,7 +27,7 @@ class InputManager:
             self.expression = ""
 
     def set_lyrics(self):
-        self.input_text.set(self.__lyrics[self.__current_index])
+        self.input_text.set(f"{self.__lyrics[self.__current_index]}")
         self.expression = ""
         self.__current_index += 1
 
@@ -45,39 +45,41 @@ class CalculatorButton(Button):
 
 
 class Calculator:
-    def __init__(self, root_window):
-        self.root_window = root_window
-        self.lyrics = ["Heto na naman tayo...", "Umiindak muli...", "Sa saliw ng buhay,", "Nating,",
-                       "Laging,", "Sumasandali..."]
-        self.root_window.title("Ringo Calculator")
-        screen_width, screen_height = self.root_window.winfo_screenwidth(), self.root_window.winfo_screenheight()
+    def __init__(self, window, lyrics):
+        self.__window = window
+        self.__lyrics = lyrics
+        self.__window.title("Ringo Calculator")
+        self.__set_position()
+        self.__window.resizable(0, 0)
+        self.__input_manager = InputManager(lyrics=self.__lyrics)
+        self.__window.bind('<KeyPress>', self.__input_manager.check_if_set_lyrics)
+        self.__window.bind()
+        self.__button_frame = Frame(self.__window, width=800, height=1200, bg="grey")
+        self.__create_widgets()
+
+    def __set_position(self):
+        screen_width, screen_height = self.__window.winfo_screenwidth(), self.__window.winfo_screenheight()
         window_width, window_height = 500, 700
         position_x = (screen_width // 2) - (window_width // 2)
         position_y = (screen_height // 2) - (window_height // 2)
-        self.root_window.geometry(f"{window_width}x{window_height}+{position_x}+{position_y}")
-        self.root_window.resizable(0, 0)
-        self.input_manager = InputManager(lyrics=self.lyrics)
-        self.root_window.bind('<KeyPress>', self.input_manager.check_if_set_lyrics)
-        self.root_window.bind()
-        self.button_frame = Frame(self.root_window, width=800, height=1200, bg="grey")
-        self.create_widgets()
+        self.__window.geometry(f"{window_width}x{window_height}+{position_x}+{position_y}")
 
-    def create_widgets(self):
-        self.create_input_field()
-        self.create_buttons()
-        self.button_frame.pack()
+    def __create_widgets(self):
+        self.__create_input_field()
+        self.__create_buttons()
+        self.__button_frame.pack()
 
-    def create_input_field(self):
-        input_frame = Frame(self.root_window, width=800, height=100, bd=0, highlightbackground="black",
-                               highlightcolor="black", highlightthickness=1)
+    def __create_input_field(self):
+        input_frame = Frame(self.__window, width=800, height=100, bd=0, highlightbackground="black",
+                            highlightcolor="black", highlightthickness=1)
         input_frame.pack(side=TOP)
 
-        input_field = Entry(input_frame, font=('arial', 32, 'bold'), textvariable=self.input_manager.input_text, width=100,
-                               bg="#eee", bd=0, justify=RIGHT)
+        input_field = Entry(input_frame, font=('arial', 26, 'bold'), textvariable=self.__input_manager.input_text,
+                            width=100, bg="#eee", bd=0, justify=RIGHT)
         input_field.grid(row=0, column=0)
         input_field.pack(ipady=30)
 
-    def create_buttons(self):
+    def __create_buttons(self):
         button_list = [["C", "C", "%", "/"],
                        ["7", "8", "9", "*"],
                        ["4", "5", "6", "-"],
@@ -107,23 +109,30 @@ class Calculator:
                         break
                 if current_text == "C":
                     width = 35
-                    command = self.input_manager.clear
+                    command = self.__input_manager.clear
                 elif current_text == "0":
                     width = 35
                 elif current_text == "=":
-                    command = self.input_manager.set_lyrics
+                    command = self.__input_manager.set_lyrics
                 else:
                     width = 17
-                self.create_button(current_text, fg, width, height, bd, bg, cursor, row_index, column_span,
-                                   column_index, command)
+                self.__create_button(current_text, fg, width, height, bd, bg, cursor, row_index, column_span,
+                                     column_index, command)
 
-    def create_button(self, text, fg, width, height, bd, bg, cursor, row_index, column_span, column_index, command):
-        button = CalculatorButton(self.button_frame, text=text, fg=fg, width=width, height=height, bd=bd, bg=bg,
-                                    cursor=cursor, command=command, input_manager=self.input_manager)
+    def __create_button(self, text, fg, width, height, bd, bg, cursor, row_index, column_span, column_index, command):
+        button = CalculatorButton(self.__button_frame, text=text, fg=fg, width=width, height=height, bd=bd, bg=bg,
+                                  cursor=cursor, command=command, input_manager=self.__input_manager)
         button.grid(row=row_index, columnspan=column_span, column=column_index, padx=1, pady=1)
+
+
+def _get_lyrics(song_name: str):
+    with open(f'lyrics/{song_name}.txt', 'r', encoding='utf-8') as file:
+        lines = file.readlines()
+
+    return [line.strip() for line in lines]
 
 
 if __name__ == "__main__":
     root_window = Tk()
-    calculator = Calculator(root_window)
+    calculator = Calculator(root_window, lyrics=_get_lyrics("mahiwagang_usok"))
     root_window.mainloop()
