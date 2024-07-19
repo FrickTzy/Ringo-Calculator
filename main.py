@@ -101,10 +101,7 @@ class Calculator:
         self.__create_widgets()
 
     def __set_position(self):
-        screen_width, screen_height = self.__window.winfo_screenwidth(), self.__window.winfo_screenheight()
-        position_x = (screen_width // 2) - (self.__WIDTH // 2)
-        position_y = (screen_height // 2) - (self.__HEIGHT // 2)
-        self.__window.geometry(f"{self.__WIDTH}x{self.__HEIGHT}+{position_x}+{position_y}")
+        self.__window.geometry(f"{self.__WIDTH}x{self.__HEIGHT}+{350}+{150}")
 
     def __create_widgets(self):
         self.__create_input_field()
